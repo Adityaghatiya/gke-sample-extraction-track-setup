@@ -1,0 +1,29 @@
+version: '3.9'
+
+services:
+  db:
+    image: postgres:14
+    environment:
+      POSTGRES_DB: habot
+      POSTGRES_USER: habotuser
+      POSTGRES_PASSWORD: habotpass
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  web:
+    build: .
+    command: gunicorn core.wsgi:application --bind 0.0.0.0:8000
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+    environment:
+      - DATABASE_URL=postgres://habotuser:habotpass@db:5432/habot
+      - DEBUG=True
+      - SECRET_KEY=django-insecure-test-key
+      - ALLOWED_HOSTS=*
+
+volumes:
+  postgres_data:
