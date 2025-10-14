@@ -1,10 +1,10 @@
 apiVersion: v1
-kind: PersistentVolumeClaim
+kind: Service
 metadata:
-  name: postgres-pvc
+  name: postgres
+  namespace: django-gke
 spec:
-  accessModes:
-    - ReadWriteOnce
-  resources:
-    requests:
-      storage: 1Gi
+  ports:
+  - port: 5432
+  selector:
+    app: postgres

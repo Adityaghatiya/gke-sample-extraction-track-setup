@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: django-config
+  namespace: django-gke
+data:
+  DEBUG: "False"
+  DB_NAME: "tododb"
+  DB_USER: "user"
+  DB_HOST: "postgres"
+  DB_PORT: "5432"
+  EMAIL_HOST: "smtp.gmail.com"
+  EMAIL_PORT: "587"
+  EMAIL_USE_TLS: "True"
+  DEFAULT_FROM_EMAIL: "habot.test@gmail.com"
