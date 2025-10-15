@@ -27,7 +27,7 @@ gcloud services enable container.googleapis.com artifactregistry.googleapis.com
 Set vars (replace <PROJECT_ID>):
 ```
 export PROJECT=<PROJECT_ID>
-export REGION=asia-south1
+export REGION=us-central1
 export REPO=extraction-repo
 export IMAGE=extraction
 export TAG=latest
@@ -36,6 +36,7 @@ Confirm this ran correctly:
 ```
 echo $PROJECT $REGION $REPO $IMAGE $TAG
 ```
+
 Create Artifact Registry :
 ```
 gcloud artifacts repositories create $REPO \
@@ -69,6 +70,12 @@ Push the image:
 ```
 docker push asia-south1-docker.pkg.dev/<PROJECT_ID>/extraction-repo/extraction:latest
 ```
+Now checking the image
+```
+export IMAGE_PATH=${REGION}-docker.pkg.dev/${PROJECT_ID}/${REPO}/${IMAGE}:${TAG}
+echo $IMAGE_PATH
+```
+<img width="1556" height="80" alt="image" src="https://github.com/user-attachments/assets/196b5bf6-2e60-41d8-b23d-9558fc632ebc" />
 
 ✅ This image will be pulled by your GKE cluster later.
 
@@ -139,5 +146,56 @@ kubectl get ingress  -n django-gke
 Once the ingress and services are active, access your Django application with loadbalancer ip:
 <img width="1919" height="1012" alt="image" src="https://github.com/user-attachments/assets/ebe9b9bc-8ee3-46ae-b5aa-fe0f3ea30b0b" />
 
+### For Troubleshooting part:-
+#### If we get error in the pods running or crashbackloop then:-
+```
+kubectl describe pod -n django-gke | grep -A 10 "Failed"
 
- 
+```
+or
+```
+kubectl describe pod django-extraction-7b754b8c79-gh885 -n django-gke
+
+```
+
+#### For checking logs or debug  it:- 
+Let’s check its logs:
+```
+kubectl logs <pods-name> -n django-gke
+```
+#### For replacing the pods
+```
+kubectl delete pod <pods-name> -n django-gke
+kubectl apply -f k8s/django-deployment.yaml
+```
+
+
+for restart the pods to pull the fresh image:
+```
+kubectl rollout restart deployment django-extraction -n django-gke
+
+```
+Then check rollout status:
+```
+kubectl rollout status deployment django-extraction -n django-gke
+```
+### For checking application is fully functional
+✅ Step 1: Check Django Pod Logs
+
+Run:
+```
+kubectl logs -n django-gke deploy/django-extraction
+```
+✅ Step 2: Verify Database Pod :- 
+Check PostgreSQL pod is Running:
+```
+kubectl get pods -n django-gke -l app=postgres
+```
+✅ Step 3: Enter Django Pod & Test DB Connection
+Run:
+```
+kubectl exec -it -n django-gke deploy/django-extraction -- python manage.py showmigrations
+```
+
+If it lists migrations with [X] or [ ]:
+→ Database is connected successfully.
