@@ -1,0 +1,22 @@
+name: CI/CD - Build and Deploy to Cloud Run
+
+on:
+  push:
+    branches:
+      - main  # Change if your deployment branch is different
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 🧩 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🧱 Build Docker Image
+        run: |
+          docker build -t gke-sample-extraction-track-setup:v1 .
+          echo "✅ Docker build complete"
+
+      - name: 🔍 Check available Docker images
+        run: docker images
